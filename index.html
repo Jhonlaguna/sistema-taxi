@@ -79,10 +79,9 @@
       }
 
       .table thead th {
-        background: #1d2939;
-        color: white;
         border: none;
         padding: 18px;
+        white-space: nowrap;
       }
 
       .table td {
@@ -126,6 +125,118 @@
         color: #555;
         font-size: 0.92rem;
       }
+
+      /* ---------- RESPONSIVE ---------- */
+
+      /* Tablet: reducir paddings y permitir scroll horizontal seguro en la tabla */
+      @media (max-width: 991.98px) {
+        .table-card {
+          overflow-x: auto;
+        }
+        .table {
+          min-width: 720px;
+        }
+      }
+
+      /* Celular: apilar navbar, stats en 2 columnas, y tabla -> tarjetas */
+      @media (max-width: 767.98px) {
+        .container {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .navbar-custom {
+          flex-direction: column;
+          align-items: flex-start !important;
+          gap: 10px;
+          padding: 16px 18px;
+        }
+
+        .navbar-custom .text-end {
+          text-align: left !important;
+          width: 100%;
+        }
+
+        h3 {
+          font-size: 1.25rem;
+        }
+
+        .card-stat {
+          padding: 14px !important;
+        }
+
+        .card-stat h2 {
+          font-size: 1.5rem;
+          margin-bottom: 0;
+        }
+
+        .card-stat small {
+          font-size: 0.75rem;
+        }
+
+        /* Oculta la tabla clásica y muestra tarjetas apiladas en su lugar */
+        .table-card {
+          display: none;
+        }
+
+        #cardsView {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .srv-card {
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+          padding: 16px;
+        }
+
+        .srv-card .srv-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 8px;
+        }
+
+        .srv-card .srv-name {
+          font-weight: 700;
+          font-size: 1.02rem;
+        }
+
+        .srv-card .srv-time {
+          font-weight: 600;
+          color: #0d6efd;
+          font-size: 0.95rem;
+          white-space: nowrap;
+          margin-left: 10px;
+        }
+
+        .srv-card .srv-addr {
+          font-size: 0.88rem;
+          color: #555;
+          margin-bottom: 4px;
+          display: flex;
+          gap: 6px;
+        }
+
+        .srv-card .srv-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .srv-card .srv-actions .btn {
+          flex: 1;
+        }
+      }
+
+      /* En escritorio/tablet, ocultar la vista de tarjetas */
+      @media (min-width: 768px) {
+        #cardsView {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -149,8 +260,8 @@
         </div>
       </div>
 
-      <div class="row mb-4">
-        <div class="col-md-3">
+      <div class="row mb-4 g-2 g-md-3">
+        <div class="col-6 col-md-3">
           <div class="card card-stat p-3">
             <small class="text-secondary">Servicios</small>
 
@@ -158,7 +269,7 @@
           </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card card-stat p-3">
             <small class="text-secondary">Pendientes</small>
 
@@ -166,7 +277,7 @@
           </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card card-stat p-3">
             <small class="text-secondary">En Ruta</small>
 
@@ -174,7 +285,7 @@
           </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card card-stat p-3">
             <small class="text-secondary">Finalizados</small>
 
@@ -194,6 +305,7 @@
         />
       </div>
 
+      <!-- Vista tabla: escritorio / tablet -->
       <div class="table-card">
         <table class="table">
           <thead>
@@ -215,11 +327,12 @@
           <tbody id="t"></tbody>
         </table>
       </div>
+
+      <!-- Vista tarjetas: celular -->
+      <div id="cardsView"></div>
     </div>
     <script>
       const init = [
-        //["Juan Pérez", "Plaza San Miguel", "Aeropuerto Jorge Chávez", "08:30"],
-        //["María López", "Av. La Marina 2000, San Miguel (Plaza San Miguel)", "Av. Elmer Faucett s/n, Callao (Aeropuerto Jorge Chávez)", "13:30"],
         [
           "Carlos Díaz",
           "Av. Larco 812, Miraflores",
@@ -337,6 +450,14 @@
       function save() {
         localStorage.setItem("srv", JSON.stringify(d));
       }
+      function esc(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
       function badge(e) {
         return e == "Sin empezar"
           ? '<span class="badge bg-secondary">' + e + "</span>"
@@ -358,10 +479,28 @@
             encodeURIComponent(de),
         );
       }
+      function actionBtnHtml(x, i) {
+        return x.e == "Finalizado"
+          ? '<button class="btn btn-success btn-sm" disabled><i class="bi bi-check-lg"></i></button>'
+          : '<button class="btn btn-primary btn-sm" onclick="act(' +
+              i +
+              ')">' +
+              (x.e == "Sin empezar"
+                ? '<i class="bi bi-play-fill"></i> Iniciar'
+                : '<i class="bi bi-check2-circle"></i> Finalizar') +
+              "</button>";
+      }
+      function tick() {
+        horaActual.innerHTML = new Date().toLocaleTimeString("es-PE", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
       function render() {
         let q = b.value.toLowerCase();
 
         t.innerHTML = "";
+        cardsView.innerHTML = "";
 
         let p = 0,
           r = 0,
@@ -372,86 +511,62 @@
           else if (x.e == "En ruta") r++;
           else f++;
 
-          if ((x.c + x.r + x.de).toLowerCase().includes(q)) {
-            let btn =
-              x.e == "Finalizado"
-                ? '<button class="btn btn-success btn-sm" disabled><i class="bi bi-check-lg"></i></button>'
-                : '<button class="btn btn-primary btn-sm" onclick="act(' +
-                  i +
-                  ')">' +
-                  (x.e == "Sin empezar"
-                    ? '<i class="bi bi-play-fill"></i> Iniciar'
-                    : '<i class="bi bi-check2-circle"></i> Finalizar') +
-                  "</button>";
+          if (!(x.c + x.r + x.de).toLowerCase().includes(q)) return;
 
-            t.innerHTML += `
+          const btn = actionBtnHtml(x, i);
 
+          // Fila de tabla (escritorio / tablet)
+          t.innerHTML += `
             <tr>
-
-            <td>
-
-            ${x.c}
-
-            </td>
-
-            <td class="address">
-
-                <i class="bi bi-geo-alt text-danger"></i>
-
-                ${x.r}
-
-            </td>
-
-            <td class="address">
-
-                <i class="bi bi-flag text-success"></i>
-
-                ${x.de}
-
-            </td>
-
-            <td class="time">
-
-                ${x.h}
-
-            </td>
-
-            <td>
-
-                ${badge(x.e)}
-
-            </td>
-
-            <td>
-
-                <button class="btn btn-route btn-sm me-2"
-
-                onclick="route('${x.r}','${x.de}')">
-
-                <i class="bi bi-map"></i>
-
-                Ruta
-
+              <td><strong>${esc(x.c)}</strong></td>
+              <td class="address"><i class="bi bi-geo-alt text-danger"></i> ${esc(x.r)}</td>
+              <td class="address"><i class="bi bi-flag text-success"></i> ${esc(x.de)}</td>
+              <td class="time">${esc(x.h)}</td>
+              <td>${badge(x.e)}</td>
+              <td>
+                <button class="btn btn-route btn-sm me-2" data-i="${i}" data-action="route">
+                  <i class="bi bi-map"></i> Ruta
                 </button>
-
                 ${btn}
-
-            </td>
-
+              </td>
             </tr>
+          `;
 
-            `;
-          }
+          // Tarjeta (celular)
+          cardsView.innerHTML += `
+            <div class="srv-card">
+              <div class="srv-top">
+                <div class="srv-name">${esc(x.c)}</div>
+                <div class="srv-time">${esc(x.h)}</div>
+              </div>
+              <div class="srv-addr"><i class="bi bi-geo-alt text-danger"></i> ${esc(x.r)}</div>
+              <div class="srv-addr"><i class="bi bi-flag text-success"></i> ${esc(x.de)}</div>
+              <div class="mt-2">${badge(x.e)}</div>
+              <div class="srv-actions">
+                <button class="btn btn-route btn-sm" data-i="${i}" data-action="route">
+                  <i class="bi bi-map"></i> Ruta
+                </button>
+                ${btn}
+              </div>
+            </div>
+          `;
+        });
+
+        // Delegación de eventos para el botón "Ruta" (evita romper con comillas en direcciones)
+        document.querySelectorAll('[data-action="route"]').forEach((el) => {
+          el.addEventListener("click", () => {
+            const idx = Number(el.dataset.i);
+            route(d[idx].r, d[idx].de);
+          });
         });
 
         totalSrv.innerHTML = d.length;
-
         pendientes.innerHTML = p;
-
         ruta.innerHTML = r;
-
         fin.innerHTML = f;
       }
+      tick();
+      setInterval(tick, 1000);
       render();
     </script>
   </body>
