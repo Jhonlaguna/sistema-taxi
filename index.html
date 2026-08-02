@@ -1,108 +1,458 @@
 <!doctype html>
 <html lang="es">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Servicios</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-<body class="bg-light">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family: Inter, sans-serif;
+        background: #f4f7fb;
+      }
+
+      .navbar-custom {
+        background: white;
+        border-radius: 18px;
+        padding: 18px 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        margin-bottom: 25px;
+      }
+
+      .card-stat {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        transition: 0.25s;
+      }
+
+      .card-stat:hover {
+        transform: translateY(-3px);
+      }
+
+      .search-box {
+        position: relative;
+      }
+
+      .search-box i {
+        position: absolute;
+        top: 13px;
+        left: 15px;
+        color: #888;
+      }
+
+      .search-box input {
+        padding-left: 42px;
+        border-radius: 12px;
+        height: 48px;
+      }
+
+      .table-card {
+        background: white;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+      }
+
+      .table {
+        margin: 0;
+      }
+
+      .table thead {
+        background: #1d2939;
+        color: white;
+      }
+
+      .table thead th {
+        background: #1d2939;
+        color: white;
+        border: none;
+        padding: 18px;
+      }
+
+      .table td {
+        vertical-align: middle;
+        padding: 18px;
+      }
+
+      .table tbody tr {
+        transition: 0.2s;
+      }
+
+      .table tbody tr:hover {
+        background: #f8fbff;
+      }
+
+      .badge {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+        border-radius: 20px;
+      }
+
+      .btn {
+        border-radius: 10px;
+      }
+
+      .btn-route {
+        border: 1px solid #d0d5dd;
+        background: white;
+      }
+
+      .btn-route:hover {
+        background: #f1f5f9;
+      }
+
+      .time {
+        font-weight: 600;
+        color: #0d6efd;
+      }
+
+      .address {
+        color: #555;
+        font-size: 0.92rem;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
     <div class="container py-4">
-        <h3>🚖 Sistema de Servicios</h3>
-        <input id="b" class="form-control my-3" placeholder="Buscar..." oninput="render()" />
-        <table class="table table-bordered bg-white">
-            <thead class="table-dark">
-                <tr>
-                    <th>Cliente</th>
-                    <th>Recojo</th>
-                    <th>Destino</th>
-                    <th>Hora</th>
-                    <th>Estado</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody id="t"></tbody>
+      <div
+        class="navbar-custom d-flex justify-content-between align-items-center"
+      >
+        <div>
+          <h3 class="mb-1">
+            <i class="bi bi-taxi-front-fill text-warning"></i>
+            Sistema de Servicios
+          </h3>
+
+          <small class="text-secondary"> Gestión de traslados </small>
+        </div>
+
+        <div class="text-end">
+          <div class="fw-bold fs-5" id="horaActual"></div>
+
+          <small class="text-secondary"> Domingo 02 de abril de 2023 </small>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card card-stat p-3">
+            <small class="text-secondary">Servicios</small>
+
+            <h2 id="totalSrv">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card card-stat p-3">
+            <small class="text-secondary">Pendientes</small>
+
+            <h2 id="pendientes">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card card-stat p-3">
+            <small class="text-secondary">En Ruta</small>
+
+            <h2 id="ruta">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card card-stat p-3">
+            <small class="text-secondary">Finalizados</small>
+
+            <h2 id="fin">0</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-box mb-4">
+        <i class="bi bi-search"></i>
+
+        <input
+          id="b"
+          class="form-control"
+          placeholder="Buscar cliente o dirección..."
+          oninput="render()"
+        />
+      </div>
+
+      <div class="table-card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th><i class="bi bi-person"></i> Cliente</th>
+
+              <th><i class="bi bi-geo-alt"></i> Recojo</th>
+
+              <th><i class="bi bi-flag"></i> Destino</th>
+
+              <th>Hora</th>
+
+              <th>Estado</th>
+
+              <th width="180">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody id="t"></tbody>
         </table>
+      </div>
     </div>
     <script>
-        const init = [
-         
-            ["María López", "Av. La Marina 2000, San Miguel (Plaza San Miguel)", "Av. Elmer Faucett s/n, Callao (Aeropuerto Jorge Chávez)", "13:30"],
-            ["Carlos Díaz", "Av. Larco 812, Miraflores", "Jr. de la Unión 300, Cercado de Lima", "14:50"],
-            ["Ana Torres", "Av. Caminos del Inca 257, Santiago de Surco", "Av. Dos de Mayo 1500, San Isidro", "15:30"],
-            ["Luis García", "Av. Alfredo Mendiola 3698, Independencia (MegaPlaza)", "Av. Tomás Valle 501, San Martín de Porres", "16:30"],
-            ["Sofía Ramos", "Av. Brasil 714, Breña", "Av. Universitaria 1801, San Miguel (PUCP)", "17:50"],
-            ["Diego Ruiz", "Av. Sáenz Peña 901, Callao", "Malecón de la Reserva 610, Miraflores (Larcomar)", "18:40"],
-            ["Valeria Soto", "Av. Grau 1010, Barranco", "Av. Alfredo Benavides 347, Miraflores", "19:50"],
-            ["Pedro León", "Jr. Trujillo 560, Rímac", "Av. Abancay 145, Cercado de Lima", "20:30"],
-            ["Camila Flores", "Av. Huaylas 1700, Chorrillos", "Av. Primavera 1200, Santiago de Surco", "21:10"],
-            ["Jorge Silva", "Av. Aviación 2500, San Borja", "Jr. Gamarra 1160, La Victoria", "21:50"],
-            ["Lucía Vega", "Av. Nicolás Ayllón 2900, Ate", "Av. Javier Prado Este 4200, Santiago de Surco (Jockey Plaza)", "22:30"],
-            ["Kevin Castro", "Av. Túpac Amaru 3200, Comas", "Av. Alfredo Mendiola 1400, Los Olivos", "23:10"],
-            ["Rosa Peña", "Av. Arica 698, Breña", "Av. Arenales 1700, Lince", "23:50"],
-            ["Miguel Paz", "Av. Brasil 3890, Magdalena del Mar", "Av. La Marina 2355, San Miguel", "00:30"],
-            ["Andrea Castillo", "Av. Canadá 1450, La Victoria", "Av. Angamos Este 1803, Surquillo", "00:50"],
-            ["José Herrera", "Av. Petit Thouars 4999, Miraflores", "Av. José Pardo 885, Miraflores", "1:30"],
-            ["Natalia Rojas", "Av. Universitaria 2500, Los Olivos", "Av. Javier Prado Este 4200, Santiago de Surco (Jockey Plaza)", "1:50"],
-            ["Ricardo Salazar", "Av. Nicolás de Piérola 650, Cercado de Lima", "Av. Paseo de la República 2000, San Isidro", "2:30"],
-        ];
-        let d = JSON.parse(localStorage.getItem("srv"));
-        if (!d) {
-            d = init.map((x) => ({
-                c: x[0],
-                r: x[1],
-                de: x[2],
-                h: x[3],
-                e: "Sin empezar",
-            }));
-            save();
-        }
-        function save() {
-            localStorage.setItem("srv", JSON.stringify(d));
-        }
-        function badge(e) {
-            return e == "Sin empezar"
-                ? '<span class="badge bg-secondary">' + e + "</span>"
-                : e == "En ruta"
-                    ? '<span class="badge bg-warning text-dark">' + e + "</span>"
-                    : '<span class="badge bg-success">' + e + "</span>";
-        }
-        function act(i) {
-            if (d[i].e == "Sin empezar") d[i].e = "En ruta";
-            else if (d[i].e == "En ruta") d[i].e = "Finalizado";
-            save();
-            render();
-        }
-        function route(r, de) {
-            open(
-                "https://www.google.com/maps/dir/" +
-                encodeURIComponent(r) +
-                "/" +
-                encodeURIComponent(de),
-            );
-        }
-        function render() {
-            let q = b.value.toLowerCase();
-            t.innerHTML = "";
-            d.forEach((x, i) => {
-                if ((x.c + x.r + x.de).toLowerCase().includes(q)) {
-                    let btn =
-                        x.e == "Finalizado"
-                            ? '<button class="btn btn-success btn-sm" disabled>✔</button>'
-                            : '<button class="btn btn-primary btn-sm" onclick="act(' +
-                            i +
-                            ')">' +
-                            (x.e == "Sin empezar" ? "Iniciar" : "Finalizar") +
-                            "</button>";
-                    t.innerHTML += `<tr><td>${x.c}</td><td>${x.r}</td><td>${x.de}</td><td>${x.h}</td><td>${badge(x.e)}</td><td><button class="btn btn-outline-secondary btn-sm me-1" onclick="route('${x.r}','${x.de}')">Ruta</button>${btn}</td></tr>`;
-                }
-            });
-        }
+      const init = [
+        //["Juan Pérez", "Plaza San Miguel", "Aeropuerto Jorge Chávez", "08:30"],
+        //["María López", "Av. La Marina 2000, San Miguel (Plaza San Miguel)", "Av. Elmer Faucett s/n, Callao (Aeropuerto Jorge Chávez)", "13:30"],
+        [
+          "Carlos Díaz",
+          "Av. Larco 812, Miraflores",
+          "Jr. de la Unión 300, Cercado de Lima",
+          "14:50",
+        ],
+        [
+          "Ana Torres",
+          "Av. Caminos del Inca 257, Santiago de Surco",
+          "Av. Dos de Mayo 1500, San Isidro",
+          "15:30",
+        ],
+        [
+          "Luis García",
+          "Av. Alfredo Mendiola 3698, Independencia (MegaPlaza)",
+          "Av. Tomás Valle 501, San Martín de Porres",
+          "16:30",
+        ],
+        [
+          "Sofía Ramos",
+          "Av. Brasil 714, Breña",
+          "Av. Universitaria 1801, San Miguel (PUCP)",
+          "17:50",
+        ],
+        [
+          "Diego Ruiz",
+          "Av. Sáenz Peña 901, Callao",
+          "Malecón de la Reserva 610, Miraflores (Larcomar)",
+          "18:40",
+        ],
+        [
+          "Valeria Soto",
+          "Av. Grau 1010, Barranco",
+          "Av. Alfredo Benavides 347, Miraflores",
+          "19:50",
+        ],
+        [
+          "Pedro León",
+          "Jr. Trujillo 560, Rímac",
+          "Av. Abancay 145, Cercado de Lima",
+          "20:30",
+        ],
+        [
+          "Camila Flores",
+          "Av. Huaylas 1700, Chorrillos",
+          "Av. Primavera 1200, Santiago de Surco",
+          "21:10",
+        ],
+        [
+          "Jorge Silva",
+          "Av. Aviación 2500, San Borja",
+          "Jr. Gamarra 1160, La Victoria",
+          "21:50",
+        ],
+        [
+          "Lucía Vega",
+          "Av. Nicolás Ayllón 2900, Ate",
+          "Av. Javier Prado Este 4200, Santiago de Surco (Jockey Plaza)",
+          "22:30",
+        ],
+        [
+          "Kevin Castro",
+          "Av. Túpac Amaru 3200, Comas",
+          "Av. Alfredo Mendiola 1400, Los Olivos",
+          "23:10",
+        ],
+        [
+          "Rosa Peña",
+          "Av. Arica 698, Breña",
+          "Av. Arenales 1700, Lince",
+          "23:50",
+        ],
+        [
+          "Miguel Paz",
+          "Av. Brasil 3890, Magdalena del Mar",
+          "Av. La Marina 2355, San Miguel",
+          "00:30",
+        ],
+        [
+          "Andrea Castillo",
+          "Av. Canadá 1450, La Victoria",
+          "Av. Angamos Este 1803, Surquillo",
+          "00:50",
+        ],
+        [
+          "José Herrera",
+          "Av. Petit Thouars 4999, Miraflores",
+          "Av. José Pardo 885, Miraflores",
+          "1:30",
+        ],
+        [
+          "Natalia Rojas",
+          "Av. Universitaria 2500, Los Olivos",
+          "Av. Javier Prado Este 4200, Santiago de Surco (Jockey Plaza)",
+          "1:50",
+        ],
+        [
+          "Ricardo Salazar",
+          "Av. Nicolás de Piérola 650, Cercado de Lima",
+          "Av. Paseo de la República 2000, San Isidro",
+          "2:30",
+        ],
+      ];
+      let d = JSON.parse(localStorage.getItem("srv"));
+      if (!d) {
+        d = init.map((x) => ({
+          c: x[0],
+          r: x[1],
+          de: x[2],
+          h: x[3],
+          e: "Sin empezar",
+        }));
+        save();
+      }
+      function save() {
+        localStorage.setItem("srv", JSON.stringify(d));
+      }
+      function badge(e) {
+        return e == "Sin empezar"
+          ? '<span class="badge bg-secondary">' + e + "</span>"
+          : e == "En ruta"
+            ? '<span class="badge bg-warning text-dark">' + e + "</span>"
+            : '<span class="badge bg-success">' + e + "</span>";
+      }
+      function act(i) {
+        if (d[i].e == "Sin empezar") d[i].e = "En ruta";
+        else if (d[i].e == "En ruta") d[i].e = "Finalizado";
+        save();
         render();
-    </script>
-</body>
+      }
+      function route(r, de) {
+        open(
+          "https://www.google.com/maps/dir/" +
+            encodeURIComponent(r) +
+            "/" +
+            encodeURIComponent(de),
+        );
+      }
+      function render() {
+        let q = b.value.toLowerCase();
 
+        t.innerHTML = "";
+
+        let p = 0,
+          r = 0,
+          f = 0;
+
+        d.forEach((x, i) => {
+          if (x.e == "Sin empezar") p++;
+          else if (x.e == "En ruta") r++;
+          else f++;
+
+          if ((x.c + x.r + x.de).toLowerCase().includes(q)) {
+            let btn =
+              x.e == "Finalizado"
+                ? '<button class="btn btn-success btn-sm" disabled><i class="bi bi-check-lg"></i></button>'
+                : '<button class="btn btn-primary btn-sm" onclick="act(' +
+                  i +
+                  ')">' +
+                  (x.e == "Sin empezar"
+                    ? '<i class="bi bi-play-fill"></i> Iniciar'
+                    : '<i class="bi bi-check2-circle"></i> Finalizar') +
+                  "</button>";
+
+            t.innerHTML += `
+
+            <tr>
+
+            <td>
+
+            ${x.c}
+
+            </td>
+
+            <td class="address">
+
+                <i class="bi bi-geo-alt text-danger"></i>
+
+                ${x.r}
+
+            </td>
+
+            <td class="address">
+
+                <i class="bi bi-flag text-success"></i>
+
+                ${x.de}
+
+            </td>
+
+            <td class="time">
+
+                ${x.h}
+
+            </td>
+
+            <td>
+
+                ${badge(x.e)}
+
+            </td>
+
+            <td>
+
+                <button class="btn btn-route btn-sm me-2"
+
+                onclick="route('${x.r}','${x.de}')">
+
+                <i class="bi bi-map"></i>
+
+                Ruta
+
+                </button>
+
+                ${btn}
+
+            </td>
+
+            </tr>
+
+            `;
+          }
+        });
+
+        totalSrv.innerHTML = d.length;
+
+        pendientes.innerHTML = p;
+
+        ruta.innerHTML = r;
+
+        fin.innerHTML = f;
+      }
+      render();
+    </script>
+  </body>
 </html>
-'''
